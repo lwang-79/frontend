@@ -4,7 +4,7 @@ frontend:
     preBuild:
       commands:
         - pip3 install awscli --upgrade --user
-        - aws codeartifact login --tool npm --repository inapps-component-library --domain rivian-test-domain --domain-owner 167866323818
+        # - aws codeartifact login --tool npm --repository inapps-component-library --domain rivian-test-domain --domain-owner 167866323818
         - npm install -g yarn
         - yarn
     build:
