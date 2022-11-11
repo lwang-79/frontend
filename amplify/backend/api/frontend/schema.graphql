@@ -1776,7 +1776,7 @@ type Vehicle
   replaceByRoute: ReplaceByRoute @connection(name: "ReplaceRouteVehicle")
   accidents: [Accident] @connection(name:"VehicleAccident")
   maintenanceRecords: [Accident]
-  vehicleDamage: [Accident] @connection(name: "VehicleDamage")
+  vehicleDamage: [Accident] @connection(name: "VehicleDamaged")
   odometerReadings: [Accident] @connection(name: "VehicleOdometerReading")
   defaultStaff: [Staff!] @connection(name:"StaffDefaultVehicle")
   defaultStaff2: [Staff!] @connection(name:"StaffDefaultVehicle2")
