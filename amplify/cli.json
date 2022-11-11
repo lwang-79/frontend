@@ -5,7 +5,7 @@
       "improvepluralization": false,
       "validatetypenamereservedwords": true,
       "useexperimentalpipelinedtransformer": false,
-      "enableiterativegsiupdates": true,
+      "enableiterativegsiupdates": false,
       "secondarykeyasgsi": false,
       "skipoverridemutationinputtypes": false,
       "transformerversion": 1,
