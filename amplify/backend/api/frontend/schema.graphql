@@ -59,7 +59,7 @@ type Accident
   vehicleDamageImages: [Document] @connection(name: "vehicleDamageImages")
   maintenanceDocuments: [Document] @connection(name: "maintenanceDocuments")
   verifiedBy: User @connection(name: "VerifiedByAccident")
-  maintenanceVehicle: Vehicle @connection(name: "VehicleMaintenance")
+  maintenanceVehicle: Vehicle
   damageVehicle: Vehicle @connection(name: "VehicleDamage")
   odometerReadingVehicle: Vehicle @connection(name: "VehicleOdometerReading")
   odometerReadingRoute: Route @connection(name: "odometerReadingRoute")
@@ -1775,7 +1775,7 @@ type Vehicle
   lastOdometerReadingDate: String
   replaceByRoute: ReplaceByRoute @connection(name: "ReplaceRouteVehicle")
   accidents: [Accident] @connection(name:"VehicleAccident")
-  maintenanceRecords: [Accident] @connection(name: "VehicleMaintenance")
+  maintenanceRecords: [Accident]
   vehicleDamage: [Accident] @connection(name: "VehicleDamage")
   odometerReadings: [Accident] @connection(name: "VehicleOdometerReading")
   defaultStaff: [Staff!] @connection(name:"StaffDefaultVehicle")
