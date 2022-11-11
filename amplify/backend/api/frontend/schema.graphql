@@ -60,7 +60,7 @@ type Accident
   maintenanceDocuments: [Document] @connection(name: "maintenanceDocuments")
   verifiedBy: User @connection(name: "VerifiedByAccident")
   maintenanceVehicle: Vehicle
-  damageVehicle: Vehicle @connection(name: "VehicleDamage")
+  damageVehicle: Vehicle @connection(name: "VehicleDamaged")
   odometerReadingVehicle: Vehicle @connection(name: "VehicleOdometerReading")
   odometerReadingRoute: Route @connection(name: "odometerReadingRoute")
   replaceOdometerReadingRoute: ReplaceByRoute @connection(name: "ReplaceodometerReadingRoute")
