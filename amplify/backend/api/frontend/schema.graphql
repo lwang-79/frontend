@@ -1,0 +1,1979 @@
+
+"""
+Used for Accidents, Vehicle Damage, Maintenance, and Odometer Readings
+"""
+type Accident
+@key(name: "byGroup", fields: ["group", "id"], queryField: "accidentsByGroup")
+@key(name: "byStaff", fields: ["staffId", "id"], queryField: "accidentsByStaff")
+@key(name: "byVehicle", fields: ["vehicleId", "accidentDate"], queryField: "accidentsByVehicle")
+@key(name: "byGroupAndAccidentDate", fields: ["group", "accidentDate"], queryField: "accidentsByGroupAndAccidentDate")
+@key(name: "byStaffByHistoryType", fields: ["staffId", "vehicleHistoryType", "accidentDate" ], queryField: "accidentsByStaffAndHistoryType")
+@key(name: "byVehicelByHistoryType", fields: ["vehicleId", "vehicleHistoryType", "accidentDate" ], queryField: "accidentsByVehicleAndHistoryType")
+@key(name: "byGroupByHistoryType", fields: ["group", "vehicleHistoryType", "accidentDate" ], queryField: "accidentsByGroupAndHistoryType")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]) {
+  id: ID!
+  group: String
+  atFault: String
+  drugTestDate: String
+  drugTestResult: String
+  """
+  accidentDate Will also be used for a generic sort date field 
+  """
+  accidentDate: String
+  accidentType: String
+  address: String
+  addressCity: String
+  addressState: String
+  addressZip: String
+  scannedReport: String
+  fileName: String
+  verifiedDate: String
+  notes: String
+  insuranceClaimNumber: String
+  policeDepartment: String
+  policeOfficerName: String
+  policeReportNumber: String
+  staffId: String
+  vehicleId: String
+  vehicleHistoryType: String
+  services: [String]
+  location: String
+  maintenanceStatus: String
+  maintenanceDateCompleted: String
+  mileageAsOfMaintenance: String
+  mileage: String
+  time: String
+  damage: String
+  damageSeverity: String
+  vehicleDamageDate: String
+  odometerDate: String
+  odometerType: String
+  vehicle: Vehicle @connection(name: "VehicleAccident")
+  scannedReports: [Document] @connection(name: "scannedReportsDocument")
+  staff: Staff @connection(name: "StaffAccident")
+  images: [Document]  @connection(name: "imagesDocument")
+  vehicleDamageImages: [Document] @connection(name: "vehicleDamageImages")
+  maintenanceDocuments: [Document] @connection(name: "maintenanceDocuments")
+  verifiedBy: User @connection(name: "VerifiedByAccident")
+  maintenanceVehicle: Vehicle @connection(name: "VehicleMaintenanceRecords")
+  damageVehicle: Vehicle @connection(name: "VehicleDamage")
+  odometerReadingVehicle: Vehicle @connection(name: "VehicleOdometerReading")
+  odometerReadingRoute: Route @connection(name: "odometerReadingRoute")
+  replaceOdometerReadingRoute: ReplaceByRoute @connection(name: "ReplaceodometerReadingRoute")
+}
+
+type Attachment 
+@key(name: "byGroup", fields: ["group", "createdAt"], queryField: "attachmentsByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String
+  createdAt: AWSDateTime
+  s3Key: String
+  expirationDate: String
+  contentType: String
+  fileSize: Int
+  message: [Message] @connection(name: "AttachmentMessage")
+  dailyRoster: [DailyRoster] @connection(name: "AttachmentDailyRoster")
+}
+
+type Card 
+@key(name: "byGroup", fields: ["group", "createdAt"], queryField: "cardsByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  stripeSetupIntent: String
+  stripeCustomerId: String
+  stripePaymentMethodId: String
+  active: Boolean
+  createdAt: AWSDateTime
+  chargeError: String
+  tenant: Tenant! @connection(name: "TenantCard")
+}
+
+type CompanyScoreCard 
+@key(name: "byGroup", fields: ["group", "yearWeek"], queryField: "companyScoreCardsByGroup")
+@key(name: "byTenantByYearWeek", fields: ["tenantId", "yearWeek"], queryField: "scorecardsByTenantAndYearWeek")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+]){
+  id: ID!
+  group: String
+  week: String
+  year: String
+  yearWeek: Int
+  overall: String
+  safetyAndCompliance: String
+  comprehensiveAudit: String
+  safetyScore: String
+  safeDriving: String
+  safeDrivingText: String
+  fico: String
+  seatbeltOff: String
+  seatbeltOffText: String
+  speedingEvent: String
+  speedingEventText: String
+  dvcrCompliance: String
+  dvcrComplianceText: String
+  onTimeCompliance: String  
+  onTimeComplianceText: String  
+  complianceScoreText: String
+  workingHoursCompliance: String
+  workingHoursComplianceText: String
+  dspAudit: String
+  dspAuditText: String
+  thirtyDaysNoticeText: String 
+  customerEscalationDefectDPMO: String
+  customerEscalationDefectDPMOText: String
+  team: String
+  highPerformersShare: String
+  highPerformersShareText: String
+  lowPerformersShare: String
+  lowPerformersShareText: String
+  attritionRate: String
+  attritionRateText: String
+  quality: String
+  deliveryCompletion: String
+  deliveryCompletionText: String
+  deliveredAndReceived: String
+  deliveredAndReceivedText: String
+  standardWorkComplianceText: String
+  photoOnDelivery: String
+  photoOnDeliveryText: String
+  contactCompliance: String
+  contactComplianceText: String
+  scanCompliance: String
+  scanComplianceText: String
+  attendedDeliveryAccuracy: String
+  attendedDeliveryAccuracyText: String
+  distractionsRate: String
+  followingDistanceRate: String
+  signSignalViolationsRate: String
+  distractionsRateText: String
+  followingDistanceRateText: String
+  signSignalViolationsRateText: String
+  scorecardPdf: String
+  podQualityPdf: String
+  customerFeedbackPdf: String
+  harshBrakingEvent: String
+  harshCorneringEvent: String
+  harshBrakingEventText: String
+  harshCorneringEventText: String
+  deliverySlotPerformance: String
+  deliverySlotPerformanceText: String
+  tenantId: ID!
+}
+
+type Counseling
+@key(name: "byGroup", fields: ["group", "id"], queryField: "counselingsByGroup")
+@key(name: "byGroupAndStatus" , fields: ["group", "status"], queryField: "counselingsByGroupAndStatus")
+@model
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String
+  date: String
+  warningType: String
+  refusedToSign: Boolean
+  signatureAcknowledge: Boolean
+  signature: String
+  counselingNotes: String
+  employeeNotes: String
+  correctiveActionSummary: String
+  priorDiscussionSummary: String
+  consequencesOfFailure: String
+  dateSent: String
+  status: String
+  dateSigned: String
+  tenantId: String
+  user: User @connection(name: "CounselingUser")
+  infractions: [Infraction] @connection(name: "CounselingInfraction")
+  staff: Staff @connection(name: "CounselingStaff")
+  images: [Document]  @connection(name: "imagesCounseling")
+  createdFrom: String
+}
+
+type CounselingTemplate
+@key(name: "byGroup", fields: ["group", "id"], queryField: "counselingTemplatesByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+])
+{
+  id: ID!
+  group: String
+  templateName: String
+  counselingNotes: String
+  priorDiscussionSummary: String
+  correctiveActionSummary: String
+  consequencesOfFailure: String
+}
+
+type MessageTemplate
+@key(name: "byGroup", fields: ["group", "id"], queryField: "messageTemplatesByGroup")
+@model
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+])
+{
+  id: ID!
+  group: String
+  name: String!
+  message: String!
+}
+
+type DailyRoster 
+@key(name: "byGroup", fields: ["group", "id"], queryField: "dailyRostersByGroup")
+@key(name: "byGroupAndNotesDate", fields: ["group", "notesDate"], queryField: "dailyRostersByGroupAndNotesDate")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String
+  notesDate: String!
+  amNotes: String
+  pmNotes: String
+  standUpNotes: String
+  lastStandUpSentTime: String
+  generalNotes: String
+  fleetNotes: String
+  userId: String
+  creationRoute: String
+  replaceByRoute: [ReplaceByRoute] @connection(name: "ReplaceRouteDailyRoster")
+  replacedByStandbyByRoute: [ReplacedByStandbyByRoute] @connection(name: "ReplacedByStandbyRouteDailyRoster" , sortField: "createdAt")
+  route: [Route!] @connection(name: "RouteDailyRoster")
+  tenant: Tenant! @connection(name: "TenantDailyRoster")
+  attachment: Attachment @connection(name: "AttachmentDailyRoster")
+}
+
+type Device 
+@key(name: "byGroup", fields: ["group", "deviceName"], queryField: "devicesByGroup")
+@key(name: "byStatus", fields: ["status", "deviceName"], queryField: "devicesByStatus")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+  ]) {
+  id: ID!
+  group: String
+  deviceName: String!
+  phoneNumber: String
+  carrier: String
+  status: String
+  notes: String
+  replaceByRoute: [ReplaceByRoute] @connection(name: "ReplaceRouteDevice")
+  route: [Route] @connection(name: "RouteDevice")
+  route2: [Route] @connection(name: "RouteDeviceTwo")
+  vehicle: [Vehicle] @connection(name: "DeviceVehicle")
+  vehicle2: [Vehicle] @connection(name: "DeviceVehicleTwo")
+}
+
+
+type Document
+@key(name: "byGroup", fields: ["group", "uploadDate"], queryField: "documentsByGroup")
+@key(name: "byType", fields: ["type", "uploadDate"], queryField: "documentsByType")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },     
+  { allow: groups, groups: ["system_admin"]}
+]) 
+{
+  id: ID!
+  group: String
+  name: String
+  key: String
+  type: String
+  uploadDate: String
+  notes: String
+  documentDate: String
+  staff: Staff @connection(name: "StaffDocument")
+  route: Route @connection(name: "RouteDocument")
+  vehicle: Vehicle @connection(name: "VehicleDocument")
+  accident: Accident @connection(name: "scannedReportsDocument")
+  infraction: Infraction @connection(name: "InfractionDocument")
+  imageAccident: Accident @connection(name: "imagesDocument")
+  imageCounseling: Counseling @connection(name: "imagesCounseling")
+  imagevehicleDamage: Accident @connection(name: "vehicleDamageImages")
+  maintenance: Accident @connection(name: "maintenanceDocuments")
+  replaceByRoute: ReplaceByRoute @connection(name: "ReplaceRouteDocument")
+  injury: Injury @connection(name: "InjuryDocument")
+}
+
+type DrugTest 
+@key(name: "byGroup", fields: ["group", "date"], queryField: "drugTestsByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  date: String
+  location: String
+  results: String
+  file: String
+  fileName: String
+  staff: Staff! @connection(name: "StaffDrugTests")
+}
+
+type Infraction
+@key(name: "byGroup", fields: ["group", "id"], queryField: "infractionsByGroup")
+@key(name: "byStaff", fields: ["staffId", "date"], queryField: "infractionsByStaff")
+@key(name: "byGroupAndDate", fields: ["group", "date"], queryField: "infractionsByGroupAndDate")
+@model
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String
+  infractionType: String
+  comment: String
+  date: String
+  time: String  
+  staffId: String
+  station: String
+  trackingNumber: String
+  infractionTier: String
+  infractionDescription: String
+  appealDate: String
+  resolvedDate: String
+  appealStatus: String
+  appealNotes: String
+  miscNotes: String
+  counseling: Counseling @connection(name: "CounselingInfraction")
+  documents: [Document] @connection(name: "InfractionDocument")
+  staff: Staff @connection(name: "StaffInfraction")
+  route: Route @connection(name: "RouteInfraction")
+}
+
+type Injury
+@key(name: "byGroup", fields: ["group", "id"], queryField: "injuriesByGroup")
+@key(name: "byStaff", fields: ["staffId"], queryField: "injuriesByStaff")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]) {
+  id: ID!
+  group: String
+  caseNumber: String
+  injuryDate: String
+  injuryTime: String
+  injuryTimeIsUnkown: String
+  timeStaffStartedWork: String
+  completedBy: String
+  completedByTitle: String
+  completedByPhone: String
+  driverHireDate: String
+  driverDOB: String
+  driverGender: String
+  driverAddress: String
+  driverCity: String
+  driverState: String
+  driverZip: String
+  physicianName: String
+  physicianFacility: String
+  physicianAddress: String
+  physicianCity: String
+  physicianState: String
+  physicianZip: String
+  wasTreatedInER: String
+  wasHospitalizedOvernight: String
+  descriptionBeforeAccident: String
+  descriptionInjury: String
+  descriptionIncident: String
+  descriptionDirectHarmCause: String
+  injuryType: String
+  notes: String
+  dateOfDeath: String
+  caseNumberFromLog: String
+  staffId: String
+  completedByUser: User @connection(name: "completedByInjury")
+  staff: Staff @connection(name: "StaffInjury")
+  documents: [Document] @connection(name: "InjuryDocument")
+}
+
+type Invoice
+@key(name: "byGroup", fields: ["group", "createdAt"], queryField: "invoicesByGroup")
+@key(name: "byGroupYearMonth", fields: ["group", "year", "month"], queryField: "invoicesByGroupAndYearAndMonth")
+@key(name: "byGroupAndStatus", fields: ["group", "status"], queryField: "invoicesByGroupAndStatus")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" }, 
+  { allow: groups, groups: ["system_admin"]}
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  createdAt: AWSDateTime
+  group: String
+  month: String
+  year: String
+  invoiceTotal: Float
+  discountPercent: Float
+  discountFixed: Float
+  discountPercentLabel: String
+  discountFixedLabel: String
+  averageActiveDriverCount: Float
+  status: String
+  html: String
+  cardLastFourCharged: String
+  invoiceLineItems: [InvoiceLineItem] @connection(name: "InvoiceInvoiceLineItems")
+  tenant: Tenant! @connection(name: "TenantInvoices")
+}
+
+type InvoiceLineItem
+@key(name: "byGroup", fields: ["group", "createdAt"], queryField: "invoiceLineItemsByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" }, 
+  { allow: groups, groups: ["system_admin"]}
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  createdAt: AWSDateTime
+  group: String
+  date: String
+  month: String
+  year: String
+  day: String
+  isTrial: Boolean
+  activeStaff: Int
+  standardCost: Int
+  standardCostExt: Float
+  bundleCost: Int
+  bundleCostExt: Float
+  performanceCost: Int
+  performanceCostExt: Float
+  rosteringCost: Int
+  rosteringCostExt: Float
+  staffCost: Int
+  staffCostExt: Float
+  vehiclesCost: Int
+  vehiclesCostExt: Float
+  messagingCost: Int
+  messagingCostExt: Float
+  invoice: Invoice @connection(name: "InvoiceInvoiceLineItems")
+}
+
+type Kudo
+@key(name: "byGroup", fields: ["group", "id"], queryField: "kudosByGroup")
+@key(name: "byStaff", fields: ["staffId", "date"], queryField: "kudosByStaff")
+@key(name: "byGroupAndDate", fields: ["group", "date"], queryField: "kudosByGroupAndDate")
+@model
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  kudoType: String
+  notes: String
+  date: String
+  staffId: String
+  staff: Staff @connection(name: "StaffKudo")
+  route: Route @connection(name: "RouteKudo")
+}
+
+type Message 
+@key(name: "byOwner", fields: ["owner", "createdAt"], queryField: "messagesByOwner")
+@key(name: "byGroup", fields: ["group", "createdAt"], queryField: "messagesByGroup")
+@key(name: "byStaffId", fields: ["staffId", "createdAt"], queryField: "messagesByStaffId")
+@key(name: "byGroupChannelType", fields: ["group", "channelType", "createdAt"], queryField: "messagesByGroupChannelType")
+@key(name: "byGroupChannelTypeIsReadS", fields: ["group", "channelType", "isReadS", "createdAt"], queryField: "messagesByGroupChannelTypeIsReadS")
+@key(name: "byGroupAndMessageType", fields: ["group", "messageType", "createdAt"], queryField: "messagesByGroupAndMessageType")
+@key(name: "byStaffAndMessageType", fields: ["staffId", "messageType", "createdAt"], queryField: "messagesByStaffAndMessageType")
+@key(name: "bySender", fields: ["senderId"])
+@key(name: "byCarrierMessageId", fields: ["carrierMessageId", "group"], queryField: "messageByCarrierMessageId")
+@model 
+@auth(rules: [
+  { allow: owner, ownerField: "owner" },
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam },
+]){
+  id: ID!
+  carrierMessageId: String
+  group: String
+  createdAt: AWSDateTime
+  staff: Staff @connection(fields: ["staffId"])
+  staffId: ID
+  replaceByRoute: ReplaceByRoute @connection(name: "ReplaceRouteMessages")
+  tenant: Tenant @connection(name: "TenantMessages")
+  route: Route @connection(name: "RouteMessages")
+  attachment: Attachment @connection(name: "AttachmentMessage")
+  messageType: String
+  channelType: String
+  destinationNumber: String
+  destinationEmail: String
+  subject: String
+  bodyText: String
+  bodyHtml: String
+  senderName: String
+  smsStatus: String
+  smsSendInformation: String
+  emailStatus: String
+  emailSendInformation: String
+  isReadS: String
+  sentBy: String
+  sentAt: String
+  linkExpiryDate: String
+  attachmentLink: String
+  contentType: String
+  isReadBy: [MessageReader!]! @connection(keyName: "byMessage", fields: ["id"])
+  senderId: ID
+  sender: User  @connection(fields: ["senderId"])
+  owner: String
+  destinationName: String
+}
+
+type Notification 
+@key(name: "byOwner", fields: ["owner", "createdAt"], queryField: "notificationsByOwner")
+@key(name: "byGroup", fields: ["group", "createdAt"], queryField: "notificationsByGroup")
+@model
+@auth(rules: [
+  { allow: owner, ownerField: "owner" },
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String
+  owner: String
+  title: String
+  createdAt: AWSDateTime
+  description: String
+  releaseNotes: String
+  payload: String
+  clickAction: String
+  isRead: Boolean
+}
+
+type OnBoard
+@key(name: "byGroup", fields: ["group", "name"], queryField: "onBoardsByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  name: String!
+  isComplete: Boolean
+  status: String
+  dateComplete: String
+  dateStart: String
+  date3: String
+  date4: String
+  date5: String
+  trainer: String
+  staff: Staff! @connection(name: "StaffOnboarding")
+}
+
+type PendingMessage 
+@key(name: "byGroup", fields: ["group", "createdAt"], queryField: "pendingMessagesByGroup")
+@key(name: "byStaffId", fields: ["staffId", "createdAt"])
+@model 
+@auth(rules: [
+    { allow: groups, groupsField: "group" },
+    { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  createdAt: AWSDateTime
+  staff: Staff @connection(fields: ["staffId"])
+  staffId: ID
+  tenant: Tenant @connection(name: "TenantMessages")
+  channelType: String
+  destinationNumber: String
+  destinationEmail: String
+  numberOfCO: String
+  numberOfPR: String
+  numberOfWeeklyCO: String
+  numberOfWeeklyPR: String
+  numberOfDailyCO: String
+  numberOfMentorCO: String
+  numberOfNetradyneCO: String
+  numberOfDailyPR: String
+  numberOfMentorPR: String
+  numberOfNetradynePR: String
+  bodyText: String
+  bodyTextCO: String
+  bodyTextPR: String
+  bodyTextDailyCO: String
+  bodyTextDailyPR: String
+  bodyTextMentorCO: String
+  bodyTextMentorPR: String
+  bodyTextNetradyneCO: String
+  bodyTextNetradynePR: String
+  bodyTextWeeklyCO: String
+  bodyTextWeeklyPR: String
+  subject: String
+  bodyHtml: String
+  importId: String
+  smsSendInformation: String
+  emailSendInformation: String
+  isRead: Boolean
+}
+
+type Physical 
+@key(name: "byGroup", fields: ["group", "date"], queryField: "physicalsByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  date: String
+  expirationDate: String
+  location: String
+  results: String
+  file: String
+  fileName: String
+  staff: Staff! @connection(name: "StaffPhysicals")
+}
+
+type PodQuality 
+@key(name: "byGroup", fields: ["group", "year", "week"], queryField: "podQualitysByGroup")
+@key(name: "byGroupUnmatched", fields: ["group", "matchedS", "year", "week"], queryField: "podQualityReportsByGroupUnmatched")
+@key(name: "byGroupTransporterId", fields: ["group", "transporterId"], queryField: "podQualityReportsByGroupAndTransporterId")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  staff: Staff @connection(name: "StaffPodQualities")
+  matched: Boolean
+  matchedS: String
+  week: String
+  year: String
+  employeeName: String
+  transporterId: String
+  blurry: String
+  explicit: String
+  mailSlot: String
+  noPackage: String
+  other: String
+  opportunities: String
+  success: String
+  bypass: String
+  packageInHand: String
+  notClearlyVisible: String
+  packageTooClose: String
+  personInPhoto: String
+  photoTooDark: String
+  takenFromCar: String
+  grandTotal: String
+}
+
+type ReplaceByRoute 
+@key(name: "byGroup", fields: ["group", "id"], queryField: "replaceRoutesByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  notes: String
+  createdAt: AWSDateTime
+  parkingSpace: String
+  routeNumber: String
+  staging: String
+  status: String
+  helperStatus: String
+  isNotActive: Boolean
+  standby: Boolean
+  time: String
+  messageSentTime: String
+  messageSentError: String
+  receivedAnnouncement: Boolean
+  rescued: Boolean
+  route: Route @connection(name: "ReplaceRouteRoute")
+  dailyRoster: DailyRoster! @connection(name: "ReplaceRouteDailyRoster")
+  device: Device @connection(name: "ReplaceRouteDevice")
+  document: [Document] @connection(name: "ReplaceRouteDocument")
+  messages: [Message] @connection(name: "ReplaceRouteMessages")
+  staff: Staff @connection(name: "ReplaceRouteStaff")
+  vehicle: Vehicle @connection(name: "ReplaceRouteVehicle")  
+  odometerReadings: [Accident] @connection(name: "ReplaceodometerReadingRoute")
+}
+
+type ReplacedByStandbyByRoute 
+@key(name: "byGroup", fields: ["group", "id"], queryField: "replacedRoutesByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  createdAt: AWSDateTime
+  routeNumber: String
+  status: String
+  standby: Boolean
+  time: String
+  route: Route @connection(name: "ReplacedByStanbyRoute")
+  dailyRoster: DailyRoster! @connection(name: "ReplacedByStandbyRouteDailyRoster")
+  staff: Staff @connection(name: "ReplacedByStandbyRouteStaff")
+}
+
+type Route 
+@key(name: "byGroup", fields: ["group", "id"], queryField: "routesByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String
+  notes: String
+  parkingSpace: String
+  routeNumber: String
+  staging: String
+  status: String
+  helperStatus: String
+  standby: Boolean
+  time: String
+  isNotActive: Boolean
+  messageSentTime: String
+  messageSentError: String
+  receivedAnnouncement: Boolean
+  rescued: Boolean
+  replaceByRoute: [ReplaceByRoute] @connection(name: "ReplaceRouteRoute" , sortField: "createdAt")
+  replacedByStandbyByRoute: [ReplacedByStandbyByRoute] @connection(name: "ReplacedByStanbyRoute" , sortField: "createdAt")
+  dailyRoster: DailyRoster! @connection(name: "RouteDailyRoster")
+  device: Device @connection(name: "RouteDevice")
+  device2: Device @connection(name: "RouteDeviceTwo")
+  document: [Document] @connection(name: "RouteDocument")
+  messages: [Message] @connection(name: "RouteMessages")
+  routeStaffId: ID
+  staff: Staff @connection(name: "RouteStaff")
+  helper: Staff @connection(name: "RouteHelper")
+  helpers: [RouteStaffHelper] @connection(keyName: "byRoute", fields: ["id"])
+  vehicle: Vehicle @connection(name: "RouteVehicle")  
+  rescuer: Staff @connection(name: "RouteRescuer")
+  rescuers: [RouteStaffRescuer] @connection(keyName: "byRoute", fields: ["id"])
+  odometerReadings: [Accident] @connection(name: "odometerReadingRoute")
+  totalStops: Int
+  totalPackages: Int
+  completedStops: Int
+  completedPackages: Int
+  undeliveredPackagesTotal: Int
+  undeliveredPackagesBusinessClose: Int
+  undeliveredPackagesUnableToAccess: Int
+  undeliveredPackagesOtherAWS: Int
+  pickUpReturnPackage: Int
+  additionalPackagesFromRescue: Int
+  splitWithRosterAssignment: Int
+  additionalPackagesFromSplit: Float
+  firstStopTime: String
+  lastStopTime: String
+  daWorkStartTime: String
+  daWorkEndTime: String
+  daRouteStartTime: String
+  daRouteEndTime: String
+  rtsTime: String
+  lunchStartTime: String
+  lunchEndTime: String
+  inspectionFueled: Boolean
+  inspectionCleaned: Boolean
+  inspectionFlashers: Boolean
+  inspectionCreditCard: Boolean
+  inspectionKeys: Boolean
+  inspectionDeviceCharger: Boolean
+  inspectionDeviceBattery: Boolean
+  inspectionNotes: String
+  infractions: [Infraction] @connection(name: "RouteInfraction")
+  kudos: [Kudo] @connection(name: "RouteKudo")
+}
+
+type ModelRouteConnection @aws_iam @aws_cognito_user_pools {
+  items: [Route]
+  nextToken: String
+  scannedCount: Int
+}
+
+type Staff 
+@key(name: "byGroup", fields: ["group", "firstName"], queryField: "staffsByGroup")
+@key(name: "byGroupStatus", fields: ["group", "status"], queryField: "staffsByGroupStatus")
+@key(name: "byStatus", fields: ["status", "firstName"], queryField: "staffsByStatus")
+@key(name: "byEmail", fields: ["email", "group"], queryField: "staffsByEmail")
+@key(name: "byPhone", fields: ["phone", "group"], queryField: "staffsByPhone")
+@key(name: "byTransporterId", fields: ["transporterId", "group"], queryField: "staffsByTransporterId")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String
+  transporterId: String
+  firstName: String!
+  lastName: String!
+  alternateNames: [String!]
+  phone: String
+  email: String
+  keyFocusArea: String
+  keyFocusAreaCompleted: Boolean
+  coachingOpportunity: String
+  status: String!
+  dlExpiration: String
+  vehicleReport: String
+  gasCardPin: String
+  defaultDevice: String
+  dob: String
+  gender: String
+  pronouns: String
+  assignedLead: String
+  isALead: Boolean
+  hourlyStatus: String
+  hireDate: String
+  terminationDate: String
+  finalCheckIssueDate: String
+  returnedUniform: Boolean
+  latestScorecard: Int
+  smsLastMessageTimestamp: String
+  smsLastMessage: String
+  smsLastMessageIsRead: Boolean
+  vehicleType: String
+  defaultVehicle: Vehicle @connection(name:"StaffDefaultVehicle")
+  defaultVehicle2: Vehicle @connection(name:"StaffDefaultVehicle2")
+  defaultVehicle3: Vehicle @connection(name:"StaffDefaultVehicle3")
+  photo: String
+  onboardingPinned: Boolean
+  netradyneDriverId: String
+  heraScore: Float
+  heraRank: Int
+  prevHeraRank: Int
+  replaceByRoute: [ReplaceByRoute] @connection(name: "ReplaceRouteStaff")
+  replacedByStandbyByRoute: [ReplacedByStandbyByRoute] @connection(name: "ReplacedByStandbyRouteStaff" , sortField: "createdAt")
+  documents: [Document] @connection(name: "StaffDocument")
+  drugTests: [DrugTest] @connection(name: "StaffDrugTests")
+  onBoarding: [OnBoard] @connection(name: "StaffOnboarding")
+  physicals: [Physical] @connection(name: "StaffPhysicals")
+  route: [Route!] @connection(name: "RouteStaff")
+  routeHelper: [Route!] @connection(name: "RouteHelper")
+  uniforms:[Uniform] @connection(name:"StaffUniforms")
+  scoreCards: [StaffScoreCard] @connection(name: "StaffScoreCard")
+  mentor: [StaffMentor] @connection(name: "StaffMentor")
+  netrdadyneAlerts: [StaffNetradyneAlert] @connection(name: "StaffNetradyneAlert")
+  cxFeedback: [StaffCxFeedback] @connection(name: "StaffCxFeedback")
+  messages: [Message]  @connection(keyName: "byStaffId", fields: ["id"])
+  staffStatusHistory: [StaffStatus] @connection(name: "StaffStatus")
+  receiveTextMessages: Boolean
+  receiveTextMessagesChangeLog: String
+  receiveEmailMessages: Boolean
+  receiveEmailMessagesChangeLog: String
+  podQualities: [PodQuality] @connection(name: "StaffPodQualities")
+  routeRescuer: [Route!] @connection(name: "RouteRescuer")
+  routeRescuerStaff: [RouteStaffRescuer!] @connection(keyName: "byStaff", fields: ["id"])
+  accidents:[Accident] @connection(name:"StaffAccident")
+  counselings: [Counseling] @connection(name: "CounselingStaff")
+  infractions: [Infraction] @connection(name: "StaffInfraction")
+  kudos: [Kudo] @connection(name: "StaffKudo")
+  injuries: [Injury] @connection(name: "StaffInjury")
+  notes: String
+  smsLastMessageIsReadBy: [String]
+  customDeliveryVan: Boolean
+  authorizedLBS: Boolean
+  preferredDaysOff: [String]
+}
+
+type StaffCxFeedback 
+@key(name: "byGroup", fields: ["group", "year", "week"], queryField: "staffCxFeedbacksByGroup")
+@key(name: "byGroupUnmatched", fields: ["group", "matchedS", "year", "week"], queryField: "cxFeebackByGroupUnmatched")
+@key(name: "byGroupTransporterId", fields: ["group", "transporterId"], queryField: "cxFeebackByGroupAndTransporterId")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  staff: Staff @connection(name: "StaffCxFeedback")
+  matched: Boolean
+  matchedS: String
+  week: String
+  year: String
+  name: String
+  messageHasBeenSent: Boolean
+  transporterId: String
+  positiveFeedback: String
+  negativeFeedback: String
+  deliveryWasGreat: String
+  deliveryWasntGreat: String
+  totalDeliveries: String
+  respectfulOfProperty: String
+  followedInstructions: String
+  friendly: String
+  aboveAndBeyond: String
+  deliveredWithCare: String
+  careForOthers: String
+  mishandledPackage: String
+  drivingUnsafely: String
+  driverUnprofessional: String
+  notDeliveredToPreferredLocation: String
+  noFeedback: String
+  onTime: String
+  lateDelivery: String
+  itemDamaged: String
+  deliveredToWrongAddress: String
+  neverReceivedDelivery: String
+}
+
+
+type StaffMentor 
+@key(name: "byGroup", fields: ["group", "date", "name"], queryField: "staffMentorsByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  staff: Staff @connection(name: "StaffMentor")
+  name: String
+  matched: Boolean
+  messageHasBeenSent: Boolean
+  date: String
+  station: String
+  trips: String
+  geotabTrips: String
+  miles: String
+  time: String
+  fico: String
+  accel: String
+  braking: String
+  cornering: String
+  speeding: String
+  distraction: String
+  seatbelt: String
+  backUp: String
+  sse: String
+  mpg: String
+  idling: String
+  engineOff: String
+  preDvcr: String
+  postDvcr: String
+  trainingAssigned: String
+  trainingCompleted: String
+}
+
+type StaffNetradyneAlert
+@key(name: "byGroup", fields: ["group", "id"], queryField: "staffNetradyneAlertsByGroup")
+@key(name: "byStaff", fields: ["staffId", "timestamp"], queryField: "staffNetradyneAlertsByStaff")
+@key(name: "byGroupInAlertsInDateRange", fields: ["group", "timestamp"], queryField: "staffNetradyneAlertsByAlertsByGroupInDateRange")
+@model
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  staffId: String
+  staff: Staff @connection(name: "StaffNetradyneAlert")
+  matched: Boolean
+  matchedS: String
+  driverName: String
+  driverId: String
+  groupName: String
+  vehicleNumber: String
+  alertId: String
+  timestamp: String
+  alertType: String
+  alertSeverity: String
+  description: String
+  alertVideoStatus: String
+  duration: String
+  startLatLong: String
+  endLatLong: String
+  sortKey: String
+}
+
+type StaffScoreCard 
+@key(name: "byGroup", fields: ["group", "year", "week"], queryField: "staffScoreCardsByGroup")
+@key(name: "byGroupUnmatched", fields: ["group", "matchedS", "year", "week"], queryField: "staffScorecardsGroupUnmatched")
+@key(name: "byGroupTransporterId", fields: ["group", "transporterId"], queryField: "staffScorecardsByGroupAndTransporterId")
+@key(name: "byGroupName", fields: ["group", "name"], queryField: "staffScorecardsByGroupAndName")
+@key(name: "byGroupMatchedName", fields: ["group", "matchedS", "year", "week", "name"], queryField: "staffScorecardsByGroupMatchedAndName")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  staff: Staff @connection(name: "StaffScoreCard")
+  matched: Boolean
+  matchedS: String
+  messageHasBeenSent: Boolean
+  week: String
+  year: String
+  name: String
+  transporterId: String
+  overallTier: String
+  delivered: String
+  keyFocusArea: String
+  ficoScore: String
+  seatbeltOffRate: String
+  dcr: String
+  dar: String
+  swcPod: String
+  swcCc: String
+  swcSc: String
+  swcAd: String
+  dnrs: String
+  podOpps: String
+  ccOpps: String
+  speedingEventRate: String
+  distractionsRate: String
+  followingDistanceRate: String
+  signSignalViolationsRate: String
+  harshBrakingRate: String
+  harshCorneringRate: String
+}
+
+type StaffStatus 
+@key(name: "byGroup", fields: ["group", "date"], queryField: "staffStatussByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  staff: Staff @connection(name: "StaffStatus")
+  reason: String
+  date: String
+  previousStatus: String
+  currentStatus: String
+}
+
+type System
+@model
+{
+  id: ID!
+  group: String
+  defaultCostStandard: Int
+  defaultCostBundle: Int
+  defaultCostPerformance: Int
+  defaultCostRostering: Int
+  defaultCostStaff: Int
+  defaultCostVehicles: Int
+  importDisabled: Boolean
+  importPodDisabled: Boolean
+  importCxDisabled: Boolean
+  importMentorDisabled: Boolean
+  importNetradyneDisabled: Boolean
+}
+
+type Task 
+@key(name: "byOwner", fields: ["owner", "status", "date"], queryField: "tasksByOwner")
+@key(name: "byCreator", fields: ["creator", "status", "date"], queryField: "tasksByCreator")
+@key(name: "byGroup", fields: ["group", "status", "date"], queryField: "tasksByGroup")
+@key(name: "byGroupStatus", fields: ["group", "status", "id"], queryField: "tasksByGroupAndStatus")
+@model 
+@auth(rules: [
+  { allow: owner, ownerField: "owner" },
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  createdAt: AWSDateTime
+  owner: String
+  creator: String
+  group: String
+  executionARN: String
+  description: String
+  date: String
+  status: String
+  taskName: String
+  isDateReminder: Boolean
+  isNotifyOnCreation: Boolean
+  reminderDate: String
+  assigner: User @connection(name: "TaskAssignerUser")
+  assignee: User @connection(name: "TaskAssigneeUser")
+}
+
+type Tenant
+@key(name: "byOriginationNumber", fields: ["originationNumber"], queryField: "tenantByOriginationNumber")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam },
+]){
+  id: ID!
+  companyName: String!
+  nameLog: String
+  numberOfSeats: Int
+  logo: String
+  accidentReport: String
+  workmansComp: String
+  dispatchNumber: String
+  addressLine1: String
+  addressLine2: String
+  addressCity: String
+  addressState: String
+  addressZip: String
+  group: String!
+  originationNumber: String
+  timeZone: String
+  timeZoneSetAutomatically: Boolean
+  trialExpDate: String
+  accountPremiumStatus: [String]
+  accountCanceledReason: String
+  notes: String
+  costStandard: Int
+  costBundle: Int
+  costPerformance: Int
+  costRostering: Int
+  costStaff: Int
+  costVehicles: Int
+  costMessaging: Int
+  discountPercent: Float
+  discountFixed: Float
+  discountPercentLabel: String
+  discountFixedLabel: String
+  payOutstandingByDate: String
+  bundleDeactivationAllowedAt: String
+  performanceDeactivationAllowedAt: String
+  rosteringDeactivationAllowedAt: String
+  staffDeactivationAllowedAt: String
+  vehiclesDeactivationAllowedAt: String
+  coachingSendTime: String
+  coachingSendTimeLocal: String
+  coachingSendTimeUtcOffset: String
+  automatedCoachingSendTime: String
+  coachingCustomMessage: String
+  messageServiceProvider: String
+  OriginationNumberOrderId: String
+  OriginationNumberStatus: String
+  """
+  Coaching Settings – Scorecard – FICO 
+  """
+  coachingFicoThresholdIssue: String
+  coachingFicoThreshold: String
+  coachingFicoThresholdPR: String
+  coachingFicoThresholdKudo: String
+  coachingFicoIssue: Boolean
+  coachingFicoCO: Boolean
+  coachingFicoPR: Boolean
+  coachingFicoKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – DCR 
+  """
+  coachingDcrThresholdIssue: String
+  coachingDcrThreshold: String
+  coachingDcrThresholdPR: String
+  coachingDcrThresholdKudo: String
+  coachingDcrIssue: Boolean
+  coachingDcrCO: Boolean
+  coachingDcrPR: Boolean
+  coachingDcrKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – DAR 
+  """
+  coachingDarThresholdIssue: String
+  coachingDarThreshold: String
+  coachingDarThresholdPR: String
+  coachingDarThresholdKudo: String
+  coachingDarIssue: Boolean
+  coachingDarCO: Boolean
+  coachingDarPR: Boolean
+  coachingDarKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – DNR
+  """
+  coachingDnrThresholdIssue: String
+  coachingDnrThreshold: String
+  coachingDnrThresholdPR: String
+  coachingDnrThresholdKudo: String
+  coachingDnrIssue: Boolean
+  coachingDnrCO: Boolean
+  coachingDnrPR: Boolean
+  coachingDnrKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – SWC-POD 
+  """
+  coachingSwcPodThresholdIssue: String
+  coachingSwcPodThreshold: String
+  coachingSwcPodThresholdKudo: String
+  coachingSwcPodThresholdPR: String
+  coachingSwcPodIssue: Boolean
+  coachingSwcPodCO: Boolean
+  coachingSwcPodPR: Boolean
+  coachingSwcPodKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – SWC-CC 
+  """
+  coachingSwcCcThresholdIssue: String
+  coachingSwcCcThreshold: String
+  coachingSwcCcThresholdKudo: String
+  coachingSwcCcThresholdPR: String
+  coachingSwcCcIssue: Boolean
+  coachingSwcCcCO: Boolean
+  coachingSwcCcPR: Boolean
+  coachingSwcCcKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – SWC-SC 
+  """
+  coachingSwcScThresholdIssue: String
+  coachingSwcScThreshold: String
+  coachingSwcScThresholdKudo: String
+  coachingSwcScThresholdPR: String
+  coachingSwcScIssue: Boolean
+  coachingSwcScCO: Boolean
+  coachingSwcScPR: Boolean
+  coachingSwcScKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – SWC-AD 
+  """
+  coachingSwcAdThresholdIssue: String
+  coachingSwcAdThreshold: String
+  coachingSwcAdThresholdKudo: String
+  coachingSwcAdThresholdPR: String
+  coachingSwcAdIssue: Boolean
+  coachingSwcAdCO: Boolean
+  coachingSwcAdPR: Boolean
+  coachingSwcAdKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – Seatbelt-Off Rate
+  """
+  coachingSeatbeltOffThresholdIssue: String
+  coachingSeatbeltOffThreshold: String
+  coachingSeatbeltOffThresholdPR: String
+  coachingSeatbeltOffThresholdKudo: String
+  coachingSeatbeltOffIssue: Boolean
+  coachingSeatbeltOffCO: Boolean
+  coachingSeatbeltOffPR: Boolean
+  coachingSeatbeltOffKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – Speeding Event Rate
+  """
+  coachingSpeedingEventThresholdIssue: String
+  coachingSpeedingEventThreshold: String
+  coachingSpeedingEventThresholdPR: String
+  coachingSpeedingEventThresholdKudo: String
+  coachingSpeedingEventIssue: Boolean
+  coachingSpeedingEventCO: Boolean
+  coachingSpeedingEventPR: Boolean
+  coachingSpeedingEventKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – Distractions Rate
+  """
+  coachingDistractionsRateThresholdIssue: String
+  coachingDistractionsRateThreshold: String
+  coachingDistractionsRateThresholdPR: String
+  coachingDistractionsRateThresholdKudo: String
+  coachingDistractionsRateIssue: Boolean
+  coachingDistractionsRateCO: Boolean
+  coachingDistractionsRatePR: Boolean
+  coachingDistractionsRateKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – Following Distance Rate
+  """
+  coachingFollowingDistanceRateThresholdIssue: String
+  coachingFollowingDistanceRateThreshold: String
+  coachingFollowingDistanceRateThresholdPR: String
+  coachingFollowingDistanceRateThresholdKudo: String
+  coachingFollowingDistanceRateIssue: Boolean
+  coachingFollowingDistanceRateCO: Boolean
+  coachingFollowingDistanceRatePR: Boolean
+  coachingFollowingDistanceRateKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – Sign/Signal Violation Rate
+  """
+  coachingSignSignalViolationsRateThresholdIssue: String
+  coachingSignSignalViolationsRateThreshold: String
+  coachingSignSignalViolationsRateThresholdPR: String
+  coachingSignSignalViolationsRateThresholdKudo: String
+  coachingSignSignalViolationsRateIssue: Boolean
+  coachingSignSignalViolationsRateCO: Boolean
+  coachingSignSignalViolationsRatePR: Boolean
+  coachingSignSignalViolationsRateKudo: Boolean
+
+  """
+  Coaching Settings – Scorecard – Overall Tier
+  """
+  coachingOverallTierThresholdIssue: String
+  coachingOverallTierThresholdKudo: String
+  coachingOverallTierIssue: Boolean
+  coachingOverallTierKudo: Boolean
+  coachingOverallTierRatingIssue: String
+  coachingOverallTierRatingKudo: String
+
+  """
+  Coaching Settings – Scorecard – Consecutive Tier
+  """
+  coachingConsecutiveTierThresholdIssue: String
+  coachingConsecutiveTierThresholdKudo: String
+  coachingConsecutiveTierIssue: Boolean
+  coachingConsecutiveTierKudo: Boolean
+  coachingConsecutiveTierRatingIssue: String
+  coachingConsecutiveTierRatingKudo: String
+
+  """
+  Coaching Settings – CX Feedback – Positive Feedback 
+  """
+  coachingPositiveFeedbackThresholdIssue: String
+  coachingPositiveFeedbackThreshold: String
+  coachingPositiveFeedbackThresholdPR: String
+  coachingPositiveFeedbackThresholdKudo: String
+  coachingPositiveFeedbackIssue: Boolean
+  coachingPositiveFeedbackCO: Boolean
+  coachingPositiveFeedbackPR: Boolean
+  coachingPositiveFeedbackKudo: Boolean
+
+  """
+  Coaching Settings – Mentor – FICO 
+  """
+  coachingDailyFicoThresholdIssue: String
+  coachingDailyFicoThreshold: String
+  coachingDailyFicoThresholdPR: String
+  coachingDailyFicoThresholdKudo: String
+  coachingDailyFicoIssue: Boolean
+  coachingDailyFicoCO: Boolean
+  coachingDailyFicoPR: Boolean
+  coachingDailyFicoKudo: Boolean
+
+  """
+  Coaching Settings – Mentor – Seatbelt
+  """
+  coachingSeatbeltThresholdIssue: String
+  coachingSeatbeltThreshold: String
+  coachingSeatbeltThresholdPR: String
+  coachingSeatbeltThresholdKudo: String
+  coachingSeatbeltIssue: Boolean
+  coachingSeatbeltCO: Boolean
+  coachingSeatbeltPR: Boolean
+  coachingSeatbeltKudo: Boolean
+
+  """
+  Coaching Settings – Mentor – Sse 
+  """
+  coachingSseIssue: Boolean
+  coachingSseCO: Boolean
+  coachingSsePR: Boolean
+  coachingSseKudo: Boolean
+  coachingSseThresholdIssue: String
+  coachingSseThreshold: String
+  coachingSseThresholdPR: String
+  coachingSseThresholdKudo: String
+  
+  """
+  Coaching Settings – Mentor – DVCRs 
+  """
+  coachingDvcrsIssue: Boolean
+  coachingDvcrsCO: Boolean
+  coachingDvcrsPR: Boolean
+
+  """
+  Coaching Settings – Scorecard – Harsh Braking Rate
+  """
+  coachingHarshBrakingRateThresholdIssue: String
+  coachingHarshBrakingRateThreshold: String
+  coachingHarshBrakingRateThresholdPR: String
+  coachingHarshBrakingRateThresholdKudo: String
+  coachingHarshBrakingRateIssue: Boolean
+  coachingHarshBrakingRateCO: Boolean
+  coachingHarshBrakingRatePR: Boolean
+  coachingHarshBrakingRateKudo: Boolean
+  """
+  Coaching Settings – CX Feedback –  DA Tier
+  """
+  coachingDaTierThresholdIssue: String
+  coachingDaTierThresholdKudo: String
+  coachingDaTierIssue: Boolean
+  coachingDaTierKudo: Boolean
+  coachingDaTierPR: Boolean
+  coachingDaTierCO: Boolean
+  coachingDaTierRatingIssue: String
+  coachingDaTierRatingCO: String
+  coachingDaTierRatingPR: String
+  coachingDaTierRatingKudo: String
+  """
+  Coaching Settings – CX Feedback –  CDF Score
+  """
+  coachingCdfScoreThresholdIssue: String
+  coachingCdfScoreThreshold:String
+  coachingCdfScoreThresholdPR: String
+  coachingCdfScoreThresholdKudo: String
+  coachingCdfScoreIssue: Boolean
+  coachingCdfScoreKudo: Boolean
+  coachingCdfScoreRatingIssue: String
+  coachingCdfScoreCO: Boolean
+  coachingCdfScorePR: Boolean
+  coachingCdfScoreRatingKudo: String
+  """
+  Coaching Settings – Scorecard – Harsh Cornering Rate
+  """
+  coachingHarshCorneringRateThresholdIssue: String
+  coachingHarshCorneringRateThreshold: String
+  coachingHarshCorneringRateThresholdPR: String
+  coachingHarshCorneringRateThresholdKudo: String
+  coachingHarshCorneringRateIssue: Boolean
+  coachingHarshCorneringRateCO: Boolean
+  coachingHarshCorneringRatePR: Boolean
+  coachingHarshCorneringRateKudo: Boolean
+
+  """
+  Coaching Settings – Mentor – Trainings Remaining 
+  """
+  coachingTraningRemainingIssue: Boolean
+  coachingTraningRemainingCO: Boolean
+  coachingTraningRemainingPR: Boolean
+
+  coachingCameraObstructionIssue: Boolean
+  coachingCameraObstructionCO: Boolean
+  coachingCameraObstructionThresholdIssue: String
+  coachingCameraObstructionThreshold: String
+  coachingDriverDistractionIssue: Boolean
+  coachingDriverDistractionCO: Boolean
+  coachingDriverDistractionThresholdIssue: String
+  coachingDriverDistractionThreshold: String
+  coachingDriverDrowsinessIssue: Boolean
+  coachingDriverDrowsinessCO: Boolean
+  coachingDriverDrowsinessThresholdIssue: String
+  coachingDriverDrowsinessThreshold: String
+  coachingDriverInitiatedIssue: Boolean
+  coachingDriverInitiatedCO: Boolean
+  coachingDriverInitiatedThresholdIssue: String
+  coachingDriverInitiatedThreshold: String
+  coachingDriverStarPR: Boolean
+  coachingDriverStarKudo: Boolean
+  coachingDriverStarThresholdPR: String
+  coachingDriverStarThresholdKudo: String
+  coachingFaceMaskComplianceIssue: Boolean
+  coachingFaceMaskComplianceCO: Boolean
+  coachingFaceMaskComplianceThresholdIssue: String
+  coachingFaceMaskComplianceThreshold: String
+  coachingFollowingDistanceIssue: Boolean
+  coachingFollowingDistanceCO: Boolean
+  coachingFollowingDistanceThresholdIssue: String
+  coachingFollowingDistanceThreshold: String
+  coachingHardAccelerationIssue: Boolean
+  coachingHardAccelerationCO: Boolean
+  coachingHardAccelerationThresholdIssue: String
+  coachingHardAccelerationThreshold: String
+  coachingHardBrakingIssue: Boolean
+  coachingHardBrakingCO: Boolean
+  coachingHardBrakingThresholdIssue: String
+  coachingHardBrakingThreshold: String
+  coachingHardTurnIssue: Boolean
+  coachingHardTurnCO: Boolean
+  coachingHardTurnThresholdIssue: String
+  coachingHardTurnThreshold: String
+  coachingHighGIssue: Boolean
+  coachingHighGCO: Boolean
+  coachingHighGThresholdIssue: String
+  coachingHighGThreshold: String
+  coachingLowImpactIssue: Boolean
+  coachingLowImpactCO: Boolean
+  coachingLowImpactThresholdIssue: String
+  coachingLowImpactThreshold: String
+  coachingSeatbeltComplianceIssue: Boolean
+  coachingSeatbeltComplianceCO: Boolean
+  coachingSeatbeltComplianceThresholdIssue: String
+  coachingSeatbeltComplianceThreshold: String
+  coachingSignViolationsIssue: Boolean
+  coachingSignViolationsCO: Boolean
+  coachingSignViolationsThresholdIssue: String
+  coachingSignViolationsThreshold: String
+  coachingSpeedingViolationsIssue: Boolean
+  coachingSpeedingViolationsCO: Boolean
+  coachingSpeedingViolationsThresholdIssue: String
+  coachingSpeedingViolationsThreshold: String
+  coachingTrafficLightViolationIssue: Boolean
+  coachingTrafficLightViolationCO: Boolean
+  coachingTrafficLightViolationThresholdIssue: String
+  coachingTrafficLightViolationThreshold: String
+  coachingUTurnIssue: Boolean
+  coachingUTurnCO: Boolean
+  coachingUTurnThresholdIssue: String
+  coachingUTurnThreshold: String
+  coachingWeavingIssue: Boolean
+  coachingWeavingCO: Boolean
+  coachingWeavingThresholdIssue: String
+  coachingWeavingThreshold: String
+  coachingDriverRankRange: String
+  usesXLcoaching: Boolean
+  shortCode: String
+  growSurfParticipantId: String
+  growSurfReferrerEmail: String
+  growSurfReferrerFullName: String
+  growSurfReferredEmail: String
+  growSurfReferredFullName: String
+  growSurfReferralComplete: Boolean
+  stripeCustomerId: String
+  stripeBillingEmail: String
+  driverReportDayRange: Int
+  cards: [Card] @connection(name: "TenantCard")
+  companyScoreCardsByYearWeek: [CompanyScoreCard] @connection(keyName: "byTenantByYearWeek", fields: ["id"])
+  dailyRoster: [DailyRoster] @connection(name: "TenantDailyRoster")
+  invoices: [Invoice] @connection(name: "TenantInvoices")
+  messages: [Message] @connection(name: "TenantMessages")
+  textractjobs: [TextractJob] @connection(name: "TenantTextractJobs")
+  users: [User] @connection(name: "TenantUsers")
+  valueLists: [ValueList] @connection(name: "TenantValueLists")
+  waves: [Wave] @connection(name: "TenantWaves")
+  premiumStatusHistory: [PremiumStatusHistory] @connection(name: "TenantPremiumStatusHistory")
+  messageServiceProviderHistory: [MessageServiceProvider] @connection(name: "TenantMessageServiceProviders")
+}
+
+type CoachingHistory
+@key(name: "byGroup", fields: ["group", "id"], queryField: "coachingHistoryByGroup")
+@key(name: "byImportId", fields: ["group", "importId"], queryField: "coachingHistoryByimportId")
+@model
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String!
+  type: String!
+  importId: String!
+  results: String!
+}
+
+type CoachingRecords
+@key(name: "byGroup", fields: ["group", "id"], queryField: "coachingRecordsByGroup")
+@key(name: "byImportId", fields: ["group", "importId"], queryField: "coachingRecordsByimportId")
+@model
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: String!
+  importId: String!
+  type: String!
+  results: String!
+}
+
+type TextractJob 
+@key(name: "byGroup", fields: ["group", "jobStatus"], queryField: "textractJobsByGroup")
+@key(name: "byOwner", fields: ["owner", "jobStatus"], queryField: "textractJobsByOwner")
+@key(name: "byJobId", fields: ["jobId", "jobStatus"], queryField: "textractJobsByJobId")
+@key(name: "byOwnerAndIsProcessedS", fields: ["owner", "isProcessedS"], queryField: "textractJobsByOwnerAndIsProcessedS")
+@model 
+@auth(rules: [
+  { allow: owner, ownerField: "owner" }, 
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String 
+  owner: String
+  tenant: Tenant! @connection(name: "TenantTextractJobs")
+  key: String!
+  fileName: String
+  week: String
+  year: String
+  template: String
+  jobId: String
+  jobStatus: String
+  type: String!
+  isProcessed: Boolean!
+  isProcessedS: String
+  results: String
+  timeZone: String
+  tenantUsesXL: Boolean
+  tenantUsesXLS: String
+  metadataCreationDate: String
+  metadataModificationDate: String
+  metadataYear: String
+  metadataWeek: String
+  scoreCardFailedValidators: String
+}
+
+type Uniform
+@key(name: "byGroup", fields: ["group", "issueDate"], queryField: "uniformsByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  uniformType: ValueListItem @connection(name: "UniformType")
+  size: ValueListItem @connection(name: "UniformSize")
+  qty: Int
+  issueDate: String
+  returnedDate: String
+  staff: Staff! @connection(name: "StaffUniforms")
+}
+
+type User 
+@key(name: "byPhone", fields: ["phone"], queryField: "usersByPhone")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+  id: ID!
+  group: [String]
+  cognitoSub: String
+  firstName: String!
+  lastName: String!
+  phone: String
+  email: String!
+  emailVerified: Boolean
+  role: String!
+  isOwner: Boolean
+  isCreator: Boolean
+  receiveSmsTaskReminders: Boolean
+  receiveEmailTaskReminders: Boolean
+  receiveSmsTaskAssignments: Boolean
+  receiveEmailTaskAssignments: Boolean
+  permissionLogin: Boolean
+  permissionFullAccess: Boolean
+  permissionDocuments: Boolean
+  permissionCounselings: Boolean
+  permissionAccidents: Boolean
+  permissionInjuries: Boolean
+  permissionDrugTests: Boolean
+  permissionDailyRostering: Boolean
+  permissionMessenger: Boolean
+  permissionPerformanceCoaching: Boolean
+  permissionDAManagement: Boolean
+  permissionCustomLists: Boolean
+  permissionManageLabels: Boolean
+  permissionMessageTemplate: Boolean
+  tenant: Tenant! @connection(name: "TenantUsers")
+  counseling: Counseling @connection(name: "CounselingUser")
+  injuriesCompletedBy: [Injury] @connection(name: "completedByInjury")
+  assignerTasks: [Task] @connection(name: "TaskAssignerUser")
+  accidentsVerified: [Accident] @connection(name: "VerifiedByAccident")
+  assigneeTasks: [Task] @connection(name: "TaskAssigneeUser")
+  completedReminders: [VehicleMaintenanceReminder] @connection(name: "completedReminder")
+  messagesRead: [MessageReader!]! @connection(keyName: "byReader", fields: ["id"])
+  messagesSent: [Message] @connection(keyName: "bySender", fields: ["id"])
+  lastLogin: String
+}
+
+type ValueList 
+@key(name: "byGroup", fields: ["group", "key"], queryField: "valueListsByGroup")
+@key(name: "byKey", fields: ["key", "id"], queryField: "valueListsByKey")
+@model 
+@auth(rules: [
+    { allow: groups, groupsField: "group" },
+    { allow: groups, groups: ["system_admin"]},
+    { allow: private, provider: iam }
+  ]){
+  id: ID!
+  group: String
+  key: String!
+  items: [ValueListItem] @connection(name: "ValueListItems")
+  tenant: Tenant! @connection(name: "TenantValueLists")
+}
+
+type ValueListItem
+@key(name: "byGroup", fields: ["group", "value"], queryField: "valueListItemsByGroup")
+@model
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]) {
+  id: ID!
+  group: String
+  value: String!
+  custom: Boolean
+  hidden: Boolean
+  deleted: Boolean
+  driverReportSetting: Float
+  valueList: ValueList @connection(name: "ValueListItems")
+  uniformTypes: [Uniform] @connection(name: "UniformType")
+  uniformSizes: [Uniform] @connection(name: "UniformSize")
+}
+
+type Vehicle 
+@key(name: "byGroup", fields: ["group", "name"], queryField: "vehiclesByGroup")
+@key(name: "byStatus", fields: ["status", "name"], queryField: "vehiclesByStatus")
+@key(name: "byGroupAndLicensePlateExp", fields: ["group", "licensePlateExp"], queryField: "vehiclesByGroupAndLicensePlateExp")
+@key(name: "byGroupAndLastOdometerReadingDate", fields: ["group", "lastOdometerReadingDate"], queryField: "vehiclesByGroupAndLastOdometerReadingDate")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+  ]) {
+  id: ID!
+  group: String
+  name: String!
+  vehicle: String
+  type: String
+  state: String
+  licensePlateExp: String
+  dateStart: String
+  dateEnd: String
+  ownership: String
+  provider: String
+  otherProvider: String
+  category: String
+  vin: String
+  make: String
+  model: String
+  year: String
+  rentalAgreementNumber: String
+  images: [String!]
+  rentalContracts: [String!]
+  accidentReports: [String!]
+  licensePlate: String
+  mileage: String
+  gasCard: String
+  status: String
+  company: String
+  notes: String
+  parkingSpace: String
+  lastOdometerReadingDate: String
+  replaceByRoute: ReplaceByRoute @connection(name: "ReplaceRouteVehicle")
+  accidents: [Accident] @connection(name:"VehicleAccident")
+  maintenanceRecords: [Accident] @connection(name: "VehicleMaintenanceRecords")
+  vehicleDamage: [Accident] @connection(name: "VehicleDamage")
+  odometerReadings: [Accident] @connection(name: "VehicleOdometerReading")
+  defaultStaff: [Staff!] @connection(name:"StaffDefaultVehicle")
+  defaultStaff2: [Staff!] @connection(name:"StaffDefaultVehicle2")
+  defaultStaff3: [Staff!] @connection(name:"StaffDefaultVehicle3")
+  device: Device @connection(name: "DeviceVehicle")
+  device2: Device @connection(name: "DeviceVehicleTwo")
+  maintenance: [VehicleMaintenance] @connection(name: "VehicleMaintenance" )
+  route: [Route!] @connection(name: "RouteVehicle")
+  documents: [Document] @connection(name: "VehicleDocument")
+  reminders: [VehicleMaintenanceReminder] @connection(name: "VehicleReminder")
+  vehicleStatusHistory: [VehicleStatus] @connection(name: "VehicleStatus")
+  overTenThousandPounds: Boolean
+  customDeliveryVan: Boolean
+  tollPassId: String
+}
+
+type VehicleMaintenance 
+@model  
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  dateScheduled: String
+  dateComleted: String
+  description: String
+  receipt: String
+  odometer: String
+  vehicle: Vehicle @connection(name: "VehicleMaintenance" )
+}
+
+type VehicleMaintenanceReminder
+@key(name: "byGroup", fields: ["group", "id"], queryField: "vehicleMaintenanceRemindersByGroup")
+@key(name: "byVehicle", fields: ["vehicleId", "dueBySort"], queryField: "vehicleMaintenanceRemindersByVehicle")
+@key(name: "byVehicleByStatus", fields: ["vehicleId", "status", "dueBySort"], queryField: "vehicleMaintanceReminderByVehicleAndStatus")
+@key(name: "byGroupByStatus", fields: ["group", "status", "dueBySort"], queryField: "vehicleMaintanceReminderByGroupAndStatus")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  dueByDate: String
+  dueByMileage: Int
+  services: [String]
+  status: String
+  vehicleId: String
+  dueBySort: Float
+  dateCompleted: String
+  userId: String
+  notes: String
+  vehicle: Vehicle @connection(name: "VehicleReminder")
+  completedBy: User @connection(name: "completedReminder")
+}
+
+type VehicleStatus 
+@key(name: "byGroup", fields: ["group", "date"], queryField: "vehicleStatusByGroup")
+@model 
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  vehicle: Vehicle @connection(name: "VehicleStatus")
+  reason: String
+  date: String
+  previousStatus: String
+  currentStatus: String
+}
+
+type Wave @model @auth(rules: [{ allow: groups, groupsField: "group" }]){
+  id: ID!
+  group: String
+  tenant: Tenant! @connection(name: "TenantWaves")
+  startTime: String
+  endTime: String
+  waveName: String
+}
+
+type RouteStaffHelper 
+@key(name: "byStaff", fields: ["staffId", "routeId"])
+@key(name: "byRoute", fields: ["routeId", "staffId"])
+@model(queries: null)
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  routeId: ID!
+  staffId: ID!
+  staff: Staff @connection(fields: ["staffId"])
+  route: Route @connection(fields: ["routeId"])
+  startTime: String
+  endTime: String
+  status: String
+  daIssueCreated: Boolean
+  counselingCreated: Boolean
+}
+
+type RouteStaffRescuer 
+@key(name: "byStaff", fields: ["staffId", "routeId"])
+@key(name: "byRoute", fields: ["routeId", "staffId"])
+@model(queries: null)
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]}
+]){
+  id: ID!
+  group: String
+  routeId: ID!
+  staffId: ID!
+  staff: Staff @connection(fields: ["staffId"])
+  route: Route @connection(fields: ["routeId"])
+  startTime: String
+  endTime: String
+  totalRescuedPackages: Int
+}
+type MessageReader 
+@model(queries: null)
+@key(name: "byReader", fields: ["userID", "messageID"])
+@key(name: "byMessage", fields: ["messageID", "userID"])
+@auth(rules: [
+  { allow: groups, groupsField: "group" },
+  { allow: groups, groups: ["system_admin"]},
+  { allow: private, provider: iam }
+]){
+    id: ID!
+    userID: ID! 
+    messageID: ID!  
+    group: String
+    readBy: User! @connection(fields: ["userID"])
+    message: Message! @connection(fields: ["messageID"])
+  }
+
+type PremiumStatusHistory
+  @key(name: "byGroup", fields: ["group", "createdAt"], queryField: "premiumStatusHistoryByGroup")
+  @model
+  @auth(rules: [
+      { allow: groups, groupsField: "group" }
+      { allow: groups, groups: ["system_admin"] }
+      { allow: private, provider: iam }
+    ]
+  ) {
+  id: ID!
+  group: String!
+  tenant: Tenant! @connection(name: "TenantPremiumStatusHistory")
+  accountPremiumStatus: [String]
+  changeNotes: String
+  createdAt: AWSDateTime
+}
+
+type MessageServiceProvider
+  @key(name: "byGroup", fields: ["group", "date"], queryField: "messageServiceProvidersByGroup")
+  @model
+  @auth(rules: [
+      { allow: groups, groupsField: "group" }
+      { allow: groups, groups: ["system_admin"] }
+      { allow: private, provider: iam }
+    ]
+  ) {
+  id: ID!
+  group: String!
+  tenant: Tenant! @connection(name: "TenantMessageServiceProviders")
+  date: String
+  previousMessageServicerProvider: String
+  currentMessageServicerProvider: String
+}
+
+type Telnyx
+  @key(name: "byGroup", fields: ["group", "id"], queryField: "telnyxsByGroup")
+  @model
+  @auth(rules: [
+      { allow: groups, groups: ["system_admin"] },
+      { allow: private, provider: iam }
+    ] 
+  ) {
+  id: ID!
+  group: String
+  phoneNumber: String
+  telnyxId: String
+  status: String
+  date: String
+}
+
+type StripeQueue
+  @key(name: "byGroup", fields: ["group", "createdAt"], queryField: "stripeQueueByGroup")
+  @model 
+  @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  group: String
+  tenant: String
+  result: String
+  invoiceId: String
+  createdAt: AWSDateTime
+}
+
